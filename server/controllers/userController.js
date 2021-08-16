@@ -1,4 +1,5 @@
 const User = require("../models/user")
+const bcrypt = require("bcryptjs")
 
 const createNewUser = async(req, res) => {
     const { email} = req.body
@@ -30,7 +31,42 @@ const createNewUser = async(req, res) => {
 }
 
 const loginUser = async(req, res) => {
+    //get email and password from body
+    const { email, password} = req.body
+    try {
+        //search for the user in DB
+        const user = await User.findOne({email})
+        if(!user) {
+            return res.status(404).json({
+                message: "User with this email doesn't exist ",
+                data: {}
+            }) 
+        }
+        //check if password is correct
+        const isMatch = await bcrypt.compare(
+            password,
+            user.password
+        )
+        if(!isMatch){
+            return res.status(400).json({
+                message: "Invalid password",
+                data: {}
+            }) 
+        }
+        //generate token
+        const token = await user.generateAuthToken()
+        
+        return res.status(200).json({
+            message: "User logged In successfully",
+            data: {user, token}
+        }) 
 
+    } catch(error) {
+        return res.status(500).json({
+            message: "Internal server error",
+            data: error
+        }) 
+    }
 }
 
 module.exports = {
