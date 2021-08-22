@@ -39,7 +39,8 @@ const userSchema = new mongoose.Schema({
     },
     country: {
         type: String,
-        trim: true
+        trim: true,
+        required:true
     },
     state: {
         type: String,

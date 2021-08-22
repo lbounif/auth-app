@@ -19,106 +19,101 @@ const ThirdStep = (props) => {
     const [selectedState, setSelectedState] = useState('')
     const [selectedCity, setSelectedCity] = useState('')
 
-    //Get contries list from country-state-city library
-    useEffect(()=> {
-        const getCountries = async() => {
-            try {
-                setIsLoading(true)
-                const result = Country.getAllCountries()
-                let allCountries = []
-                allCountries = result?.map(({ isoCode, name})=> ({
-                    isoCode,
+    useEffect(() => {
+        const getCountries = async () => {
+          try {
+            setIsLoading(true);
+            const result = await Country.getAllCountries()
+            let allCountries = [];
+            allCountries = result?.map(({ isoCode, name }) => ({
+              isoCode,
+              name
+            }));
+            const firstCountry = allCountries[0].isoCode
+            setCountries(allCountries);
+            setSelectedCountry(firstCountry);
+            setIsLoading(false);
+          } catch (error) {
+            setCountries([]);
+            setIsLoading(false);
+          }
+        };
+    
+        getCountries();
+      }, []);
+    
+      useEffect(() => {
+        const getStates = async () => {
+          try {
+            console.log("selectedCountry is: ", selectedCountry)
+           
+            const result = await State.getStatesOfCountry(selectedCountry)
+            console.log("states: ", result)
+            let allStates = [];
+            allStates = result?.map(({ isoCode, name }) => ({
+              isoCode,
+              name
+            }));
+            const firstState = allStates[0].isoCode
+            console.log("---firstState: ", firstState)
+            setCities([]);
+            setSelectedCity('');
+            setStates(allStates);
+            setSelectedState(firstState);
+          } catch (error) {
+            setStates([]);
+            setCities([]);
+            setSelectedCity('');
+          }
+        };
+    
+        getStates();
+      }, [selectedCountry]);
+    
+      useEffect(() => {
+        const getCities = async () => {
+          console.log("selectedCountry is: ", selectedCountry)
+          console.log("selectedState is: ", selectedState)
+          try {
+           
+                const result = await City.getCitiesOfCountry(
+                    selectedCountry
+                  );
+                console.log("------cities are: ", result)
+                let filteredCities = result.filter(city => 
+                    city.stateCode === selectedState
+                )
+                console.log("------filteredCities: ", filteredCities)
+                let allCities = []
+                allCities = filteredCities?.map(({ name})=> ({
                     name
                 }))
-                const firstCountry = allCountries[0].isoCode
-                console.log("------firstCountry ", firstCountry)
-                setCountries(allCountries)
-                setSelectedCountry(firstCountry)
-                console.log("-----1-selectedCountry: ", selectedCountry)
-                setIsLoading(false)
-            } catch(error) {
-                setCountries([])
-                setIsLoading(false)
-            }
-        }
-        getCountries()
-    }, [])
-
-
-    //Get states list from country-state-city library
-    // useEffect(()=> {
-    //     const getStates = async() => {
-    //         try {
-    //             console.log("-----2-selectedCountry: ", selectedCountry)
-    //             const result = State.getStatesOfCountry(selectedCountry);
-                
-    //             console.log("---states: ", result)
-    //             let allStates = []
-    //             allStates = result?.map(({ isoCode, name})=> ({
-    //                 isoCode,
-    //                 name
-    //             }))
-    //             // const [{ isoCode: firstState = '' } = {}] = allStates;
-    //             const firstState = allStates[0].isoCode
-    //             setCities([]);
-    //             setSelectedCity('');
-    //             setStates(allStates);
-    //             setSelectedState(firstState);
-    //             console.log("firstState: ", firstState)
-
-    //         } catch(error) {
-    //             setStates()
-    //             setCities([])
-    //         }
-            
-    //     }
-    //     getStates()
-    // }, [selectedCountry])
-
-
-    //Get cities list from country-state-city library
-    // useEffect(()=> {
-    //     const getCities = async() => {
-    //         try {
-    //             console.log("-----3-selectedState: ", selectedState)
-                
-    //             const result = City.getCitiesOfCountry(
-    //                 selectedCountry
-    //               );
-    //               console.log("------cities are: ", result)
-    //             let filteredCities = result.filter(city => 
-    //                 city.stateCode === selectedState
-    //             )
-    //             console.log("------filteredCities: ", filteredCities)
-    //             let allCities = []
-    //             allCities = filteredCities?.map(({ name})=> ({
-    //                 name
-    //             }))
-
-    //             console.log("allCities: ",allCities)
-    //             const firstCity = allCities[0].name
-    //             // setStates(allCities)
-    //             // setCities(allCities)
-    //             // setSelectedCity(firstCity)
-    //             // const [{ name: firstCity = '' } = {}] = allCities;
-    //             console.log("firstCity is: ",firstCity)
-    //             setCities(allCities);
-    //             setSelectedCity(firstCity);
-
-    //         } catch(error) {
-    //             console.log("error: ", error)
-    //             setCities([])
-    //         }
-    //     }
-    //     getCities()
-    // }, [selectedState])
+                const firstCity = allCities[0].name
+                setCities(allCities);
+                setSelectedCity(firstCity);
+            } catch (error) {
+            setCities([]);
+          }
+        };
+    
+        getCities();
+      }, [selectedState]);
 
     const handleSubmit = async (event) => {
         event.preventDefault()
         props.history.push('/login')
         //API Call to register the user
+        const addedData = {
+            country: countries.find(
+            (country) => country.isoCode === selectedCountry
+            )?.name,
+            state:
+            states.find((state) => state.isoCode === selectedState)?.name || '', // or condition added because selectedState might come as undefined
+            city: selectedCity
+        };
         try {
-            const { user } = props
+            let { user } = props
+            user = {...user, ...addedData}
             console.log("user is: ", user)
             const response = await axios.post(`${BASE_API_URL}/register`, user)
             console.log("-----response.data: ", response)
@@ -166,10 +161,10 @@ const ThirdStep = (props) => {
                 <Form.Control
                     as="select"
                     name="state"
-                    // value={selectedState}
-                    // onChange={(event)=> setSelectedState(event.target.value)}
+                    value={selectedState}
+                    onChange={(event)=> setSelectedState(event.target.value)}
                 >
-                {/* { states.length > 0 ? (
+                { states.length > 0 ? (
                      states.map(({isoCode, name}) => (
                         <option value={isoCode} key={isoCode}>
                             {name}
@@ -180,7 +175,7 @@ const ThirdStep = (props) => {
                         No State found
                     </option>
                 )   
-                } */}
+                }
                 </Form.Control>
 
             </Form.Group>
@@ -189,10 +184,10 @@ const ThirdStep = (props) => {
                 <Form.Control
                     as="select"
                     name="city"
-                    // value={selectedCity}
-                    // onChange={(event)=> setSelectedCity(event.target.value)}
+                    value={selectedCity}
+                    onChange={(event)=> setSelectedCity(event.target.value)}
                 >
-                {/* {
+                {
                      cities.length > 0 ? (
                         cities.map(({ name}) => (
                            <option value={name} key={name}>
@@ -204,7 +199,7 @@ const ThirdStep = (props) => {
                            No Cities found
                        </option>
                    )   
-                } */}
+                }
 
                 </Form.Control>
             </Form.Group>

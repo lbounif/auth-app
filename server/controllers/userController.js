@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs")
 
 const createNewUser = async(req, res) => {
     const { email } = req.body
+    console.log(req.body)
     
     let user = await User.find({email})
     console.log("user: ", user)
@@ -15,8 +16,9 @@ const createNewUser = async(req, res) => {
     }
     try {
         user = new User(req.body)
+        console.log("user is: ", user)
         const savedUser = await user.save()
-
+        console.log("savedUser: ", savedUser)
         return res.status(201).json({
             message: "User saved successfully",
             data: savedUser
