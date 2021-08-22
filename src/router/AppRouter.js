@@ -12,45 +12,40 @@ const AppRouter = () => {
     const updatedUser = (data) => {
         setUser((prevUser) => ({ ...prevUser, ...data}))
     }
-
-    return (
-        <BrowserRouter>
-            <div className="container">
-                <Header />
-                <Switch>
-                    <Route 
-                        path="/"
-                        exact
-                        render={(props)=> {
-                            <FirstStep 
-                                {...props} 
-                                user={user} 
-                                updatedUser={updatedUser} />
-                        }}/>
-                    <Route 
-                        path="/second"
-                        exact
-                        render={(props)=> {
-                            <SecondStep 
-                                {...props}
-                                user={user} 
-                                updatedUser={updatedUser} />
-                        }}/>
-                    <Route 
-                        path="/third"
-                        exact
-                        render={(props)=> {
-                            <ThirdStep 
-                                {...props}
-                                user={user} 
-                                updatedUser={updatedUser} />
-                        }}/>
-                    <Route path="/login" component={Login}/>
-                    <Route render={()=> <Redirect to="/" />}/>
-                </Switch>
-            </div>
-        </BrowserRouter>
-    )
+      return (
+    <BrowserRouter>
+      <div className="container">
+        <Header />
+        <Switch>
+          <Route
+            render={(props) => (
+              <FirstStep {...props} user={user} updateUser={updatedUser} />
+            )}
+            path="/"
+            exact={true}
+          />
+          <Route
+            render={(props) => (
+              <SecondStep {...props} user={user} updateUser={updatedUser} />
+            )}
+            path="/second"
+          />
+          <Route
+            render={(props) => (
+              <ThirdStep
+                {...props}
+                user={user}
+                updateUser={updatedUser}
+              />
+            )}
+            path="/third"
+          />
+          <Route component={Login} path="/login" />
+          <Route render={() => <Redirect to="/" />} />
+        </Switch>
+      </div>
+    </BrowserRouter>
+  );
 }
 export default AppRouter
 
