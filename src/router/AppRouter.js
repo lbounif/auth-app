@@ -12,6 +12,10 @@ const AppRouter = () => {
     const updatedUser = (data) => {
         setUser((prevUser) => ({ ...prevUser, ...data}))
     }
+
+    const resetUser = () => {
+      setUser({})
+    }
       return (
     <BrowserRouter>
       <div className="container">
@@ -36,6 +40,7 @@ const AppRouter = () => {
                 {...props}
                 user={user}
                 updateUser={updatedUser}
+                resetUser={resetUser}
               />
             )}
             path="/third"

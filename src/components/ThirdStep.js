@@ -6,7 +6,7 @@ import swal from 'sweetalert2'
 import { BASE_API_URL } from '../utils/constants'
 
 
-const ThirdStep = () => {
+const ThirdStep = (props) => {
     //State of countries, states and cities list
     //[] -> [Algeria,....., France,...]
     const [countries, setCountries] = useState([])
@@ -31,9 +31,10 @@ const ThirdStep = () => {
                     name
                 }))
                 const firstCountry = allCountries[0].isoCode
-                console.log("firstCountry ", firstCountry)
+                console.log("------firstCountry ", firstCountry)
                 setCountries(allCountries)
                 setSelectedCountry(firstCountry)
+                console.log("-----1-selectedCountry: ", selectedCountry)
                 setIsLoading(false)
             } catch(error) {
                 setCountries([])
@@ -45,62 +46,95 @@ const ThirdStep = () => {
 
 
     //Get states list from country-state-city library
-    useEffect(()=> {
-        const getStates = async() => {
-            try {
-                console.log("-----2-selectedCountry: ", selectedCountry)
-                const result = State.getStatesOfCountry(selectedCountry);
-                console.log("---states: ", result)
-                let allStates = []
-                allStates = result?.map(({ isoCode, name})=> ({
-                    isoCode,
-                    name
-                }))
-                console.log("allStates: ", allStates)
-                // const firstState = allStates[0].isoCode
-                // console.log("firstState: ", firstState)
-                setStates(allStates)
-                setCities([])
-                // setSelectedState(firstState)
+    // useEffect(()=> {
+    //     const getStates = async() => {
+    //         try {
+    //             console.log("-----2-selectedCountry: ", selectedCountry)
+    //             const result = State.getStatesOfCountry(selectedCountry);
+                
+    //             console.log("---states: ", result)
+    //             let allStates = []
+    //             allStates = result?.map(({ isoCode, name})=> ({
+    //                 isoCode,
+    //                 name
+    //             }))
+    //             // const [{ isoCode: firstState = '' } = {}] = allStates;
+    //             const firstState = allStates[0].isoCode
+    //             setCities([]);
+    //             setSelectedCity('');
+    //             setStates(allStates);
+    //             setSelectedState(firstState);
+    //             console.log("firstState: ", firstState)
 
-            } catch(error) {
-                setStates()
-                setCities([])
-            }
+    //         } catch(error) {
+    //             setStates()
+    //             setCities([])
+    //         }
             
-        }
-        getStates()
-    }, [selectedCountry])
+    //     }
+    //     getStates()
+    // }, [selectedCountry])
 
 
     //Get cities list from country-state-city library
-    useEffect(()=> {
-        const getCities = async() => {
-            try {
-                console.log("-----3-selectedState: ", selectedState)
-                const result = City.getCitiesOfCountry(selectedState)
-                console.log("cities: ", result)
-                let allCities = []
-                allCities = result?.map(({ name})=> ({
-                    name
-                }))
+    // useEffect(()=> {
+    //     const getCities = async() => {
+    //         try {
+    //             console.log("-----3-selectedState: ", selectedState)
+                
+    //             const result = City.getCitiesOfCountry(
+    //                 selectedCountry
+    //               );
+    //               console.log("------cities are: ", result)
+    //             let filteredCities = result.filter(city => 
+    //                 city.stateCode === selectedState
+    //             )
+    //             console.log("------filteredCities: ", filteredCities)
+    //             let allCities = []
+    //             allCities = filteredCities?.map(({ name})=> ({
+    //                 name
+    //             }))
 
-                console.log("allCities: ",allCities)
-                //  const firstCity = allCities[0].name
-                // setStates(allCities)
-                setCities(allCities)
-                // setSelectedCity(firstCity)
+    //             console.log("allCities: ",allCities)
+    //             const firstCity = allCities[0].name
+    //             // setStates(allCities)
+    //             // setCities(allCities)
+    //             // setSelectedCity(firstCity)
+    //             // const [{ name: firstCity = '' } = {}] = allCities;
+    //             console.log("firstCity is: ",firstCity)
+    //             setCities(allCities);
+    //             setSelectedCity(firstCity);
 
-            } catch(error) {
-                console.log("error: ", error)
-                setCities([])
-            }
-        }
-        getCities()
-    }, [selectedState])
+    //         } catch(error) {
+    //             console.log("error: ", error)
+    //             setCities([])
+    //         }
+    //     }
+    //     getCities()
+    // }, [selectedState])
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (event) => {
+        event.preventDefault()
+        props.history.push('/login')
         //API Call to register the user
+        try {
+            const { user } = props
+            console.log("user is: ", user)
+            const response = await axios.post(`${BASE_API_URL}/register`, user)
+            console.log("-----response.data: ", response)
+            swal.fire('Awsome!', "You are successfully registred!", 'success').then(
+                (result) => {
+                    console.log("result: ", result)
+                    if(result.isConfirmed || result.isDismissed){
+                        props.resetUser()
+                        props.history.push('/login')
+                    }
+                }
+            )
+
+        } catch (error) {
+            console.log("error: ", error)
+        }
     }
     return (
         <Form className="input-form" onSubmit={handleSubmit}>
@@ -132,10 +166,10 @@ const ThirdStep = () => {
                 <Form.Control
                     as="select"
                     name="state"
-                    value={selectedState}
-                    onChange={(event)=> setSelectedState(event.target.value)}
+                    // value={selectedState}
+                    // onChange={(event)=> setSelectedState(event.target.value)}
                 >
-                { states.length > 0 ? (
+                {/* { states.length > 0 ? (
                      states.map(({isoCode, name}) => (
                         <option value={isoCode} key={isoCode}>
                             {name}
@@ -146,7 +180,7 @@ const ThirdStep = () => {
                         No State found
                     </option>
                 )   
-                }
+                } */}
                 </Form.Control>
 
             </Form.Group>
@@ -155,10 +189,10 @@ const ThirdStep = () => {
                 <Form.Control
                     as="select"
                     name="city"
-                    value={selectedCity}
-                    onChange={(event)=> setSelectedCity(event.target.value)}
+                    // value={selectedCity}
+                    // onChange={(event)=> setSelectedCity(event.target.value)}
                 >
-                {
+                {/* {
                      cities.length > 0 ? (
                         cities.map(({ name}) => (
                            <option value={name} key={name}>
@@ -170,7 +204,7 @@ const ThirdStep = () => {
                            No Cities found
                        </option>
                    )   
-                }
+                } */}
 
                 </Form.Control>
             </Form.Group>
