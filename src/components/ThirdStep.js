@@ -80,12 +80,13 @@ const ThirdStep = (props) => {
                     selectedCountry
                   );
                 console.log("------cities are: ", result)
+                //get cities of selectedState only
                 let filteredCities = result.filter(city => 
                     city.stateCode === selectedState
                 )
                 console.log("------filteredCities: ", filteredCities)
                 let allCities = []
-                allCities = filteredCities?.map(({ name})=> ({
+                allCities = filteredCities?.map(({name})=> ({
                     name
                 }))
                 const firstCity = allCities[0].name
@@ -128,7 +129,12 @@ const ThirdStep = (props) => {
             )
 
         } catch (error) {
-            console.log("error: ", error)
+            console.log("--error: ", error)
+            swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to register'
+            })
         }
     }
     return (
